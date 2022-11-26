@@ -168,4 +168,13 @@ export class ShopContract {
     // get_ft_balance() {
     //     return internalGetWallet(this);
     // }
+
+    @view({})
+    check_account({ account_id }: { account_id: string }) {
+        const success = this.accounts.containsKey(account_id);
+        return {
+            success,
+            msg: success ? "Account registered" : "Account not found",
+        };
+    }
 }
