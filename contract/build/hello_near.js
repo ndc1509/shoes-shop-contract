@@ -1376,6 +1376,25 @@ function restoreTransactionIds(collection) {
   if (collection == null) return null;
   return UnorderedSet.reconstruct(collection);
 }
+function restoreItems(collection) {
+  if (collection == null) return null;
+  return UnorderedMap.reconstruct(collection);
+}
+function txToTxJson(tx) {
+  const items = restoreItems(tx.items).toArray().map(([productId, productData]) => ({
+    id: productId,
+    data: productData
+  }));
+  return {
+    buyer: tx.buyer,
+    status: tx.status,
+    shippingPrice: tx.shippingPrice,
+    totalPrice: tx.totalPrice,
+    createdAt: tx.createdAt,
+    updatedAt: tx.updatedAt,
+    items
+  };
+}
 
 function internalSetProduct(contract, productId, quantity, unitPrice) {
   assert(quantity >= 0 && BigInt(unitPrice) >= 0, "Invalid product data");
@@ -1434,8 +1453,8 @@ function internalGetTx(contract, txId, accountId) {
 function internalGetTxsByAccountId(contract, accountId) {
   assert(contract.accounts.containsKey(accountId), "Account not found");
   const txIds = restoreTransactionIds(contract.accounts.get(accountId)).toArray();
-  const txs = txIds.map(id => internalGetTx(contract, id));
-  return txs;
+  const txsJson = txIds.map(id => txToTxJson(internalGetTx(contract, id)));
+  return txsJson;
 }
 function internalUpdateTx(contract, txId, oldStatus, newStatus, accountId) {
   const tx = internalGetTx(contract, txId, accountId);
@@ -1626,34 +1645,34 @@ function internalConfirmComplete(contract, txId) {
   internalUpdateTx(contract, txId, TX_STATUS.TRANSFERRING, TX_STATUS.SUCCESS, buyerId);
 }
 
-var _dec, _dec2, _dec3, _dec4, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _dec12, _dec13, _dec14, _dec15, _dec16, _dec17, _dec18, _dec19, _class, _class2;
+var _dec, _dec2, _dec3, _dec4, _dec5, _dec6, _dec7, _dec8, _dec9, _dec10, _dec11, _dec12, _dec13, _dec14, _dec15, _dec16, _dec17, _dec18, _dec19, _dec20, _class, _class2;
 let ShopContract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({
   privateFunction: true
 }), _dec4 = call({
   privateFunction: true
 }), _dec5 = call({
   privateFunction: true
-}), _dec6 = view(), _dec7 = view(), _dec8 = call({
+}), _dec6 = view(), _dec7 = view(), _dec8 = view(), _dec9 = call({
   payableFunction: true
-}), _dec9 = call({
-  privateFunction: true
 }), _dec10 = call({
-  payableFunction: true
+  privateFunction: true
 }), _dec11 = call({
-  privateFunction: true
+  payableFunction: true
 }), _dec12 = call({
-  payableFunction: true
+  privateFunction: true
 }), _dec13 = call({
-  privateFunction: true
-}), _dec14 = call({
   payableFunction: true
-}), _dec15 = call({
+}), _dec14 = call({
   privateFunction: true
+}), _dec15 = call({
+  payableFunction: true
 }), _dec16 = call({
   privateFunction: true
 }), _dec17 = call({
+  privateFunction: true
+}), _dec18 = call({
   payableFunction: true
-}), _dec18 = view(), _dec19 = view(), _dec(_class = (_class2 = class ShopContract {
+}), _dec19 = view(), _dec20 = view(), _dec(_class = (_class2 = class ShopContract {
   //<ProductId, ProductData>
   //<AccountId, TransactionId[]>
   //<AccountId, depositAmount>
@@ -1705,6 +1724,11 @@ let ShopContract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({
   }
   get_all_products() {
     return JSON.stringify(internalGetAllProducts(this));
+  }
+  get_products({
+    product_ids
+  }) {
+    return JSON.stringify(product_ids.map(id => internalGetProduct(this, id)));
   }
 
   //Registration
@@ -1794,13 +1818,19 @@ let ShopContract = (_dec = NearBindgen({}), _dec2 = initialize(), _dec3 = call({
   check_account({
     account_id
   }) {
+    if (this.owner_id === account_id) {
+      return {
+        success: true,
+        msg: "admin"
+      };
+    }
     const success = this.accounts.containsKey(account_id);
     return {
       success,
       msg: success ? "Account registered" : "Account not found"
     };
   }
-}, (_applyDecoratedDescriptor(_class2.prototype, "init", [_dec2], Object.getOwnPropertyDescriptor(_class2.prototype, "init"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "add_product", [_dec3], Object.getOwnPropertyDescriptor(_class2.prototype, "add_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "update_product", [_dec4], Object.getOwnPropertyDescriptor(_class2.prototype, "update_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "remove_product", [_dec5], Object.getOwnPropertyDescriptor(_class2.prototype, "remove_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_product", [_dec6], Object.getOwnPropertyDescriptor(_class2.prototype, "get_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_all_products", [_dec7], Object.getOwnPropertyDescriptor(_class2.prototype, "get_all_products"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "register_call", [_dec8], Object.getOwnPropertyDescriptor(_class2.prototype, "register_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_register", [_dec9], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_register"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "buy_token_call", [_dec10], Object.getOwnPropertyDescriptor(_class2.prototype, "buy_token_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_buy_token", [_dec11], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_buy_token"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "create_order_call", [_dec12], Object.getOwnPropertyDescriptor(_class2.prototype, "create_order_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_create_order", [_dec13], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_create_order"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "cancel_order_call", [_dec14], Object.getOwnPropertyDescriptor(_class2.prototype, "cancel_order_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_cancel_order", [_dec15], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_cancel_order"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "confirm_order", [_dec16], Object.getOwnPropertyDescriptor(_class2.prototype, "confirm_order"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "confirm_complete", [_dec17], Object.getOwnPropertyDescriptor(_class2.prototype, "confirm_complete"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_txs_of", [_dec18], Object.getOwnPropertyDescriptor(_class2.prototype, "get_txs_of"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "check_account", [_dec19], Object.getOwnPropertyDescriptor(_class2.prototype, "check_account"), _class2.prototype)), _class2)) || _class);
+}, (_applyDecoratedDescriptor(_class2.prototype, "init", [_dec2], Object.getOwnPropertyDescriptor(_class2.prototype, "init"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "add_product", [_dec3], Object.getOwnPropertyDescriptor(_class2.prototype, "add_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "update_product", [_dec4], Object.getOwnPropertyDescriptor(_class2.prototype, "update_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "remove_product", [_dec5], Object.getOwnPropertyDescriptor(_class2.prototype, "remove_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_product", [_dec6], Object.getOwnPropertyDescriptor(_class2.prototype, "get_product"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_all_products", [_dec7], Object.getOwnPropertyDescriptor(_class2.prototype, "get_all_products"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_products", [_dec8], Object.getOwnPropertyDescriptor(_class2.prototype, "get_products"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "register_call", [_dec9], Object.getOwnPropertyDescriptor(_class2.prototype, "register_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_register", [_dec10], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_register"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "buy_token_call", [_dec11], Object.getOwnPropertyDescriptor(_class2.prototype, "buy_token_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_buy_token", [_dec12], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_buy_token"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "create_order_call", [_dec13], Object.getOwnPropertyDescriptor(_class2.prototype, "create_order_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_create_order", [_dec14], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_create_order"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "cancel_order_call", [_dec15], Object.getOwnPropertyDescriptor(_class2.prototype, "cancel_order_call"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "resolve_cancel_order", [_dec16], Object.getOwnPropertyDescriptor(_class2.prototype, "resolve_cancel_order"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "confirm_order", [_dec17], Object.getOwnPropertyDescriptor(_class2.prototype, "confirm_order"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "confirm_complete", [_dec18], Object.getOwnPropertyDescriptor(_class2.prototype, "confirm_complete"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "get_txs_of", [_dec19], Object.getOwnPropertyDescriptor(_class2.prototype, "get_txs_of"), _class2.prototype), _applyDecoratedDescriptor(_class2.prototype, "check_account", [_dec20], Object.getOwnPropertyDescriptor(_class2.prototype, "check_account"), _class2.prototype)), _class2)) || _class);
 function check_account() {
   const _state = ShopContract._getState();
   if (!_state && ShopContract._requireInit()) {
@@ -1967,6 +1997,19 @@ function register_call() {
   ShopContract._saveToStorage(_contract);
   if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(ShopContract._serialize(_result, true));
 }
+function get_products() {
+  const _state = ShopContract._getState();
+  if (!_state && ShopContract._requireInit()) {
+    throw new Error("Contract must be initialized");
+  }
+  const _contract = ShopContract._create();
+  if (_state) {
+    ShopContract._reconstruct(_contract, _state);
+  }
+  const _args = ShopContract._getArgs();
+  const _result = _contract.get_products(_args);
+  if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(ShopContract._serialize(_result, true));
+}
 function get_all_products() {
   const _state = ShopContract._getState();
   if (!_state && ShopContract._requireInit()) {
@@ -2047,5 +2090,5 @@ function init() {
   if (_result !== undefined) if (_result && _result.constructor && _result.constructor.name === "NearPromise") _result.onReturn();else env.value_return(ShopContract._serialize(_result, true));
 }
 
-export { ShopContract, add_product, buy_token_call, cancel_order_call, check_account, confirm_complete, confirm_order, create_order_call, get_all_products, get_product, get_txs_of, init, register_call, remove_product, resolve_buy_token, resolve_cancel_order, resolve_create_order, resolve_register, update_product };
+export { ShopContract, add_product, buy_token_call, cancel_order_call, check_account, confirm_complete, confirm_order, create_order_call, get_all_products, get_product, get_products, get_txs_of, init, register_call, remove_product, resolve_buy_token, resolve_cancel_order, resolve_create_order, resolve_register, update_product };
 //# sourceMappingURL=hello_near.js.map

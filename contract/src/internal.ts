@@ -1,8 +1,8 @@
 import { assert, near } from "near-sdk-js";
 import { ShopContract } from "./contract";
 import { TX_STATUS } from "./enum";
-import { Product, ProductData } from "./metadata";
-import { restoreTransactionIds } from "./utils";
+import { Product, ProductData, Transaction, TransactionJSON } from "./metadata";
+import { restoreItems, restoreTransactionIds, txToTxJson } from "./utils";
 
 function internalSetProduct(
     contract: ShopContract,
@@ -62,11 +62,12 @@ export function internalGetProduct(
 }
 
 export function internalGetAllProducts(contract: ShopContract): Product[] {
-    const products: Product[] = contract.products
-        .toArray()
-        .map(([id, data]): Product => ({
-            id, data
-        }));
+    const products: Product[] = contract.products.toArray().map(
+        ([id, data]): Product => ({
+            id,
+            data,
+        })
+    );
     return products;
 }
 
@@ -98,11 +99,16 @@ export function internalGetTx(
     return tx;
 }
 
-export function internalGetTxsByAccountId(contract: ShopContract, accountId: string) {
+export function internalGetTxsByAccountId(
+    contract: ShopContract,
+    accountId: string
+) {
     assert(contract.accounts.containsKey(accountId), "Account not found");
-    const txIds = restoreTransactionIds(contract.accounts.get(accountId)).toArray();
-    const txs = txIds.map((id) => internalGetTx(contract, id));
-    return txs;
+    const txIds = restoreTransactionIds(
+        contract.accounts.get(accountId)
+    ).toArray();
+    const txsJson = txIds.map((id) => txToTxJson(internalGetTx(contract, id)));
+    return txsJson;
 }
 
 export function internalUpdateTx(

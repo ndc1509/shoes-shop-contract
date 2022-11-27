@@ -20,3 +20,13 @@ export class Transaction {
     createdAt: string;
     updatedAt: string;
 }
+
+export class TransactionJSON {
+    status: TX_STATUS;
+    buyer: string;
+    items: Product[];
+    shippingPrice: string;
+    totalPrice: string;
+    createdAt: string;
+    updatedAt: string;
+}

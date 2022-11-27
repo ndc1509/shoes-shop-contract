@@ -86,6 +86,13 @@ export class ShopContract {
         return JSON.stringify(internalGetAllProducts(this));
     }
 
+    @view({})
+    get_products({ product_ids }: { product_ids: string[] }) {
+        return JSON.stringify(
+            product_ids.map((id) => internalGetProduct(this, id))
+        );
+    }
+
     //Registration
     @call({ payableFunction: true })
     register_call() {
@@ -171,6 +178,12 @@ export class ShopContract {
 
     @view({})
     check_account({ account_id }: { account_id: string }) {
+        if (this.owner_id === account_id) {
+            return {
+                success: true,
+                msg: "admin",
+            };
+        }
         const success = this.accounts.containsKey(account_id);
         return {
             success,
