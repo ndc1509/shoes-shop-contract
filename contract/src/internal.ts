@@ -107,7 +107,7 @@ export function internalGetTxsByAccountId(
     const txIds = restoreTransactionIds(
         contract.accounts.get(accountId)
     ).toArray();
-    const txsJson = txIds.map((id) => txToTxJson(internalGetTx(contract, id)));
+    const txsJson = txIds.map((id) => txToTxJson(id, internalGetTx(contract, id)));
     return txsJson;
 }
 

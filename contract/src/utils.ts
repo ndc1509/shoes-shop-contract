@@ -41,7 +41,7 @@ export function assertCrossContractCall() {
     );
 }
 
-export function txToTxJson(tx: Transaction): TransactionJSON {
+export function txToTxJson(id: string, tx: Transaction): TransactionJSON {
     const items = restoreItems(tx.items)
         .toArray()
         .map(
@@ -51,6 +51,7 @@ export function txToTxJson(tx: Transaction): TransactionJSON {
             })
         );
     return {
+        id,
         buyer: tx.buyer,
         status: tx.status,
         shippingPrice: tx.shippingPrice,

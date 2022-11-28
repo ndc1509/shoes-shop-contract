@@ -1380,12 +1380,13 @@ function restoreItems(collection) {
   if (collection == null) return null;
   return UnorderedMap.reconstruct(collection);
 }
-function txToTxJson(tx) {
+function txToTxJson(id, tx) {
   const items = restoreItems(tx.items).toArray().map(([productId, productData]) => ({
     id: productId,
     data: productData
   }));
   return {
+    id,
     buyer: tx.buyer,
     status: tx.status,
     shippingPrice: tx.shippingPrice,
@@ -1453,7 +1454,7 @@ function internalGetTx(contract, txId, accountId) {
 function internalGetTxsByAccountId(contract, accountId) {
   assert(contract.accounts.containsKey(accountId), "Account not found");
   const txIds = restoreTransactionIds(contract.accounts.get(accountId)).toArray();
-  const txsJson = txIds.map(id => txToTxJson(internalGetTx(contract, id)));
+  const txsJson = txIds.map(id => txToTxJson(id, internalGetTx(contract, id)));
   return txsJson;
 }
 function internalUpdateTx(contract, txId, oldStatus, newStatus, accountId) {

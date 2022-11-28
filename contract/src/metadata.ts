@@ -22,6 +22,7 @@ export class Transaction {
 }
 
 export class TransactionJSON {
+    id: string;
     status: TX_STATUS;
     buyer: string;
     items: Product[];
