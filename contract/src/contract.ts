@@ -2,7 +2,6 @@ import {
     call,
     initialize,
     LookupMap,
-    near,
     NearBindgen,
     UnorderedMap,
     UnorderedSet,
@@ -22,12 +21,10 @@ import {
 import { ProductData, Transaction } from "./metadata";
 import { internalRegister, internalResolveRegister } from "./registration";
 import {
-    internalBuyToken,
     internalCancelOrder,
     internalConfirmComplete,
     internalConfirmOrder,
     internalCreateOrder,
-    internalResolveBuyToken,
     internalResolveCancelOrder,
     internalResolveCreateOrder,
 } from "./shop_core";
@@ -109,17 +106,6 @@ export class ShopContract {
     //     this.accounts.remove(id);
     // }
 
-    //Buy ft
-    @call({ payableFunction: true })
-    buy_token_call() {
-        internalBuyToken(this);
-    }
-
-    @call({ privateFunction: true })
-    resolve_buy_token({ amount }: { amount: string }) {
-        internalResolveBuyToken(amount);
-    }
-
     //Create order
     @call({ payableFunction: true })
     create_order_call({ items, shipping_price }: OrderedItemsDto) {
@@ -165,16 +151,6 @@ export class ShopContract {
     get_txs_of({ account_id }: { account_id: string }) {
         return JSON.stringify(internalGetTxsByAccountId(this, account_id));
     }
-
-    // @view({})
-    // get_ft_rate() {
-    //     return internalGetFtRate(this);
-    // }
-
-    // @view({})
-    // get_ft_balance() {
-    //     return internalGetWallet(this);
-    // }
 
     @view({})
     check_account({ account_id }: { account_id: string }) {

@@ -1,8 +1,8 @@
 import { assert, near } from "near-sdk-js";
 import { ShopContract } from "./contract";
 import { TX_STATUS } from "./enum";
-import { Product, ProductData, Transaction, TransactionJSON } from "./metadata";
-import { restoreItems, restoreTransactionIds, txToTxJson } from "./utils";
+import { Product, ProductData } from "./metadata";
+import { restoreTransactionIds, txToTxJson } from "./utils";
 
 function internalSetProduct(
     contract: ShopContract,
@@ -107,7 +107,9 @@ export function internalGetTxsByAccountId(
     const txIds = restoreTransactionIds(
         contract.accounts.get(accountId)
     ).toArray();
-    const txsJson = txIds.map((id) => txToTxJson(id, internalGetTx(contract, id)));
+    const txsJson = txIds.map((id) =>
+        txToTxJson(id, internalGetTx(contract, id))
+    );
     return txsJson;
 }
 

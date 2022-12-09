@@ -1,54 +1,12 @@
-import { bytes, LookupSet, UnorderedMap, UnorderedSet } from "near-sdk-js";
-import { assert } from "near-sdk-js";
-import { near } from "near-sdk-js";
+import { assert, bytes, near, UnorderedMap } from "near-sdk-js";
 import { Item } from ".";
 import { ShopContract } from "./contract";
 import { GAS, TX_STATUS } from "./enum";
 import { internalSendNEAR, internalUpdateTx } from "./internal";
 import { ProductData, Transaction } from "./metadata";
-import {
-    assertCrossContractCall,
-    getPromiseResults,
-    restoreTransactionIds,
-} from "./utils";
+import { getPromiseResults, restoreTransactionIds } from "./utils";
 
-export function internalBuyToken(contract: ShopContract) {
-    const promise = near.promiseBatchCreate(contract.ft_contract);
-    const nearAmount = near.attachedDeposit();
-    near.promiseBatchActionFunctionCall(
-        promise,
-        "on_buy_ft",
-        bytes(JSON.stringify({})),
-        nearAmount,
-        GAS.FT_ON_PURCHASE
-    );
-    near.promiseThen(
-        promise,
-        near.currentAccountId(),
-        "resolve_buy_token",
-        bytes(
-            JSON.stringify({
-                amount: nearAmount.toString(),
-            })
-        ),
-        0,
-        GAS.RESOLVE_BUY_TOKEN
-    );
-    return near.promiseReturn(promise);
-}
 
-export function internalResolveBuyToken(
-    // contract: ShopContract,
-    amount: string
-) {
-    const response = getPromiseResults();
-    if (!response) {
-        //Revert
-        internalSendNEAR(near.signerAccountId(), BigInt(amount));
-        return false;
-    }
-    return true;
-}
 
 export function internalCreateOrder(
     contract: ShopContract,
