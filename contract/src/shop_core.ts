@@ -2,11 +2,13 @@ import { assert, bytes, near, UnorderedMap } from "near-sdk-js";
 import { Item } from ".";
 import { ShopContract } from "./contract";
 import { GAS, TX_STATUS } from "./enum";
-import { internalSendNEAR, internalUpdateTx } from "./internal";
+import { internalGetTx, internalSendNEAR, internalUpdateTx } from "./internal";
 import { ProductData, Transaction } from "./metadata";
-import { getPromiseResults, restoreTransactionIds } from "./utils";
-
-
+import {
+    getPromiseResults,
+    restoreItems,
+    restoreTransactionIds,
+} from "./utils";
 
 export function internalCreateOrder(
     contract: ShopContract,
@@ -167,6 +169,17 @@ export function internalResolveCancelOrder(
         internalUpdateTx(contract, txId, TX_STATUS.CANCELED, TX_STATUS.PENDING);
         return false;
     }
+    //Update product stock
+    const tx = internalGetTx(contract, txId);
+    const items = restoreItems(tx.items).toArray();
+    items.forEach(([id, data]) => {
+        const productId = id;
+        const productStock = contract.products.get(productId);
+        productStock.quantity = (
+            Number(productStock.quantity) + data.quantity
+        ).toString();
+        contract.products.set(productId, productStock);
+    });
     return true;
 }
 
